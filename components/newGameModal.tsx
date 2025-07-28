@@ -1,8 +1,10 @@
 // Modal that will create a newGame object containing data to send
 import React, { useState } from 'react';
-import { Modal, StyleSheet, TextInput, View, ImageBackground, TouchableOpacity, Image, Text, } from 'react-native';
+import { Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
 import BlindsPicker from './pickers/blindsPicker';
 import DatePicker from './pickers/datePicker';
+import LocationPicker from './pickers/locationPicker';
+import TimePicker from './pickers/timePicker';
 
 // Defines our modal
 interface AddGameModalProps {
@@ -18,16 +20,32 @@ enum GameType {
 
 // initializing our modal adding our props and creating inital variables and their state
 const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
+  // Game type state
   const [gameType, setGameType] = useState<GameType | null>(null);
+
+  // Blind State
   const [blindAmount, setBlindAmount] = useState('');
   const blindOptions = ['0.25/0.50', '1/3'];
+
+  // Location and Time states
   const [gameDate, setGameDate] = useState('');
   const [location, setLocation] = useState('');
+  const locationOptions = ['Dept. of Interiors', "Terwilliger's Midweek Madness", "David's Den", "Cherokee Harris"]
+  const [startTime, setStartTime] = useState('');
+  const [endTime, setEndTime] = useState('');
+  const [activeTimeField, setActiveTimeField] = useState<'start' | 'end' | null>(null);
+
+  // Placement and money states
   const [tournamentPlace, setTournamentPlace] = useState('');
+  const placementOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11+']
   const [cashIn, setCashIn] = useState('');
   const [cashOut, setCashOut] = useState('');
+
+  // Visibility States
   const [blindPickerVisible, setBlindPickerVisible] = useState(false);
   const [datePickerVisible, setDatePickerVisible] = useState(false);
+  const [timePickerVisible, setTimePickerVisible] = useState(false);
+  const [locationPickerVisible, setLocationPickerVisible] = useState(false);
 
   // Function that resets our input boxes back to inital state
   const resetForm = () => {
@@ -67,17 +85,16 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           </View>
           {(gameType === GameType.CASH || gameType === GameType.TOURNAMENT) && (
             <>
+              <TouchableOpacity onPress={() => setLocationPickerVisible(true)} style={styles.input}>
+                <Text>
+                  {location || 'Location'}
+                </Text>
+              </TouchableOpacity>
               <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={styles.input}>
                 <Text>
                   {gameDate || 'Game Date'}
                 </Text>
               </TouchableOpacity>
-              <TextInput
-                value={location}
-                onChangeText={text => setLocation(text)}
-                placeholder="Location"
-                style={styles.input}
-              />
               <TouchableOpacity onPress={() => setBlindPickerVisible(true)} style={styles.input}>
                 <Text>
                   {blindAmount || 'Select Blinds'}
@@ -95,6 +112,16 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           )}
           {gameType === GameType.CASH && (
             <>
+              <TouchableOpacity onPress={() => setTimePickerVisible(true)} style={styles.input}>
+                <Text>
+                  {startTime || 'Start Time'}
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => setTimePickerVisible(true)} style={styles.input}>
+                <Text>
+                  {endTime || 'End Time'}
+                </Text>
+              </TouchableOpacity>
               <TextInput
                 value={cashIn}
                 onChangeText={text => setCashIn(text)}
@@ -128,6 +155,15 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           </TouchableOpacity>
         </View>
       </ImageBackground>
+      <LocationPicker
+        visible={locationPickerVisible}
+        selectedValue={location}
+        options={locationOptions}
+        onValueChange={(value) => {
+          setLocation(value);
+          setLocationPickerVisible(false);}}
+        onClose={() => setLocationPickerVisible(false)}
+      />
       <BlindsPicker
         visible={blindPickerVisible}
         selectedValue={blindAmount}
@@ -140,11 +176,17 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
       <DatePicker
         visible={datePickerVisible}
         selectedValue={gameDate}
-        options={blindOptions}
         onValueChange={(value) => {
           setGameDate(value);
           setDatePickerVisible(false);}}
         onClose={() => setDatePickerVisible(false)}
+      />
+      <TimePicker
+        visible={timePicker}
+        selectedValue={} // will be start or end time, need to clarify how to handle
+        onValueChange={(value) => {
+          setTimePickerVisible(false);}}
+        onClose={() => setTimePickerVisible(false)}
       />
     </Modal>
   );
