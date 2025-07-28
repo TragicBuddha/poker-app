@@ -1,7 +1,8 @@
 // Modal that will create a newGame object containing data to send
 import React, { useState } from 'react';
-import { Modal, StyleSheet, TextInput, View, ImageBackground, TouchableOpacity, Image, Text } from 'react-native';
-
+import { Modal, StyleSheet, TextInput, View, ImageBackground, TouchableOpacity, Image, Text, } from 'react-native';
+import BlindsPicker from './pickers/blindsPicker';
+import DatePicker from './pickers/datePicker';
 
 // Defines our modal
 interface AddGameModalProps {
@@ -18,15 +19,20 @@ enum GameType {
 // initializing our modal adding our props and creating inital variables and their state
 const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
   const [gameType, setGameType] = useState<GameType | null>(null);
+  const [blindAmount, setBlindAmount] = useState('');
+  const blindOptions = ['0.25/0.50', '1/3'];
   const [gameDate, setGameDate] = useState('');
   const [location, setLocation] = useState('');
   const [tournamentPlace, setTournamentPlace] = useState('');
   const [cashIn, setCashIn] = useState('');
   const [cashOut, setCashOut] = useState('');
+  const [blindPickerVisible, setBlindPickerVisible] = useState(false);
+  const [datePickerVisible, setDatePickerVisible] = useState(false);
 
   // Function that resets our input boxes back to inital state
   const resetForm = () => {
     setGameType(null);
+    setBlindAmount('');
     setGameDate('');
     setLocation('');
     setTournamentPlace('');
@@ -61,18 +67,22 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           </View>
           {(gameType === GameType.CASH || gameType === GameType.TOURNAMENT) && (
             <>
-              <TextInput
-                value={gameDate}
-                onChangeText={text => setGameDate(text)}
-                placeholder="Game Date"
-                style={styles.input}
-              />
+              <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={styles.input}>
+                <Text>
+                  {gameDate || 'Game Date'}
+                </Text>
+              </TouchableOpacity>
               <TextInput
                 value={location}
                 onChangeText={text => setLocation(text)}
                 placeholder="Location"
                 style={styles.input}
               />
+              <TouchableOpacity onPress={() => setBlindPickerVisible(true)} style={styles.input}>
+                <Text>
+                  {blindAmount || 'Select Blinds'}
+                </Text>
+              </TouchableOpacity>
             </>
           )}
           {gameType === GameType.TOURNAMENT && (
@@ -118,6 +128,24 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           </TouchableOpacity>
         </View>
       </ImageBackground>
+      <BlindsPicker
+        visible={blindPickerVisible}
+        selectedValue={blindAmount}
+        options={blindOptions}
+        onValueChange={(value) => {
+          setBlindAmount(value);
+          setBlindPickerVisible(false);}}
+        onClose={() => setBlindPickerVisible(false)}
+      />
+      <DatePicker
+        visible={datePickerVisible}
+        selectedValue={gameDate}
+        options={blindOptions}
+        onValueChange={(value) => {
+          setGameDate(value);
+          setDatePickerVisible(false);}}
+        onClose={() => setDatePickerVisible(false)}
+      />
     </Modal>
   );
 };
@@ -158,6 +186,7 @@ const styles = StyleSheet.create({
     paddingLeft: 10,
     width: '100%',
     borderRadius: 10,
+    justifyContent: 'center',
   },
   saveButtonContainer: {
     marginTop: 20,
@@ -191,6 +220,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: 'white',
     marginTop: 0,
+  },
+  pickerOverlay: {
+  flex: 1,
+  justifyContent: 'center',
+  alignItems: 'center',
+  backgroundColor: 'rgba(0, 0, 0, 0.4)',
+  },
+  pickerContainer: {
+    backgroundColor: 'white',
+    padding: 20,
+    borderRadius: 15,
+    alignItems: 'center',
+  },
+  pickerTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+  },
+  closePickerButton: {
+    backgroundColor: '#222',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 10,
+  },
+  closePickerText: {
+    color: 'white',
+    fontSize: 16,
   },
 });
 
