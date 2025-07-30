@@ -3,7 +3,7 @@ import {Modal, View, StyleSheet, TouchableOpacity, Text} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 
-interface pickerModalProps {
+interface blindsPickerModalProps {
     visible: boolean;
     options: string[];
     selectedValue: string;
@@ -17,7 +17,7 @@ export default function blindsPicker({
     selectedValue,
     onValueChange,
     onClose,
-}: pickerModalProps) {
+}: blindsPickerModalProps) {
     return (
         <Modal visible={visible} transparent animationType="slide">
             <View style={styles.overlay}>

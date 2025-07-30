@@ -27,13 +27,24 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
   const [blindAmount, setBlindAmount] = useState('');
   const blindOptions = ['0.25/0.50', '1/3'];
 
-  // Location and Time states
-  const [gameDate, setGameDate] = useState('');
+  // Location State
   const [location, setLocation] = useState('');
   const locationOptions = ['Dept. of Interiors', "Terwilliger's Midweek Madness", "David's Den", "Cherokee Harris"]
-  const [startTime, setStartTime] = useState('');
-  const [endTime, setEndTime] = useState('');
+  
+  // Date and time states with time functions
+  const [gameDate, setGameDate] = useState<Date | null>(null);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [endTime, setEndTime] = useState<Date | null>(null);
   const [activeTimeField, setActiveTimeField] = useState<'start' | 'end' | null>(null);
+  const openTimePicker = (field: 'start' | 'end') => {
+    setActiveTimeField(field);
+    setTimePickerVisible(true);
+  };
+
+  const onChangeTime = (time: Date) => {
+    if (activeTimeField === 'start') setStartTime(time);
+    else if (activeTimeField === 'end') setEndTime(time);
+  };
 
   // Placement and money states
   const [tournamentPlace, setTournamentPlace] = useState('');
@@ -51,7 +62,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
   const resetForm = () => {
     setGameType(null);
     setBlindAmount('');
-    setGameDate('');
+    setGameDate(new Date());
     setLocation('');
     setTournamentPlace('');
     setCashIn('');
@@ -92,7 +103,11 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={styles.input}>
                 <Text>
-                  {gameDate || 'Game Date'}
+                  {gameDate ? gameDate.toLocaleDateString([],
+                  { year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  }) : 'Select Date'}
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity onPress={() => setBlindPickerVisible(true)} style={styles.input}>
@@ -112,16 +127,21 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           )}
           {gameType === GameType.CASH && (
             <>
-              <TouchableOpacity onPress={() => setTimePickerVisible(true)} style={styles.input}>
-                <Text>
-                  {startTime || 'Start Time'}
-                </Text>
+              <TouchableOpacity onPress={() => openTimePicker('start')} style={styles.input}>
+                <Text>{startTime ? startTime.toLocaleTimeString([],
+                  { hour: 'numeric',
+                    minute: '2-digit'
+                  }
+                ) : 'Start Time'}</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={() => setTimePickerVisible(true)} style={styles.input}>
-                <Text>
-                  {endTime || 'End Time'}
-                </Text>
+
+              <TouchableOpacity onPress={() => openTimePicker('end')} style={styles.input}>
+                <Text>{endTime ? endTime.toLocaleTimeString([],
+                  { hour: 'numeric',
+                    minute: '2-digit'
+                  }) : 'End Time'}</Text>
               </TouchableOpacity>
+
               <TextInput
                 value={cashIn}
                 onChangeText={text => setCashIn(text)}
@@ -160,8 +180,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
         selectedValue={location}
         options={locationOptions}
         onValueChange={(value) => {
-          setLocation(value);
-          setLocationPickerVisible(false);}}
+          setLocation(value);}}
         onClose={() => setLocationPickerVisible(false)}
       />
       <BlindsPicker
@@ -169,23 +188,22 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
         selectedValue={blindAmount}
         options={blindOptions}
         onValueChange={(value) => {
-          setBlindAmount(value);
-          setBlindPickerVisible(false);}}
+          setBlindAmount(value);}}
         onClose={() => setBlindPickerVisible(false)}
       />
       <DatePicker
         visible={datePickerVisible}
-        selectedValue={gameDate}
-        onValueChange={(value) => {
-          setGameDate(value);
-          setDatePickerVisible(false);}}
+        date={gameDate ?? new Date()}
+        onChangeDate={setGameDate}
         onClose={() => setDatePickerVisible(false)}
       />
       <TimePicker
-        visible={timePicker}
-        selectedValue={} // will be start or end time, need to clarify how to handle
-        onValueChange={(value) => {
-          setTimePickerVisible(false);}}
+        visible={timePickerVisible}
+        time={
+          activeTimeField === 'start'
+          ? startTime ?? new Date()
+          : endTime ?? new Date()}
+        onChangeTime={onChangeTime}
         onClose={() => setTimePickerVisible(false)}
       />
     </Modal>
