@@ -2,7 +2,7 @@ import { Picker } from '@react-native-picker/picker';
 import { Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 
-interface pickerModalProps {
+interface locationPickerModalProps {
     visible: boolean;
     options: string[];
     selectedValue: string;
@@ -16,7 +16,7 @@ export default function locationPicker({
     selectedValue,
     onValueChange,
     onClose,
-}: pickerModalProps) {
+}: locationPickerModalProps) {
     return (
         <Modal visible={visible} transparent animationType="slide">
             <View style={styles.overlay}>
