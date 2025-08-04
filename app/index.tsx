@@ -18,8 +18,10 @@ export default function HomeScreen() {
       source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/app_background.png')}
       style={styles.container}
     >
-      <Text style={styles.bankrollTitle}>Bankroll: $153.75</Text>
-      <Text style={styles.hourlyTitle}>Current Hourly: $35.00/HR</Text>
+      <View style={styles.statContainer}>
+        <Text style={styles.bankrollTitle}>Bankroll: $153.75</Text>
+        <Text style={styles.hourlyTitle}>Current Hourly: $35.00/HR</Text>
+      </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={toggleGameModal}>
           <Image
@@ -31,13 +33,6 @@ export default function HomeScreen() {
           isVisible={gameModalVisible}
           onClose={toggleGameModal}
         ></AddGameModal>
-
-        <TouchableOpacity>
-          <Image
-            style={styles.seeStatsButton}
-            source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/stats_tab_icon.png')}
-          />
-        </TouchableOpacity>
       </View>
     </ImageBackground>
   );
@@ -47,31 +42,29 @@ const styles = StyleSheet.create({
   container: {
     flex:1,
   },
-  bankrollTitle: {
-    fontSize: 30,
-    position: "absolute",
-    top: 110,
-    left: 35,
-  },
-  hourlyTitle: {
-    fontSize: 30,
-    position: "absolute",
-    top: 160,
-    left: 35,
+  statContainer: {
+    flexDirection: 'column',
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: 'black',
+    paddingTop: 110,
+    height: 720,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    marginTop: 675,
     borderWidth: 2,
-    borderColor: 'black'
+    borderColor: 'black',
+    height: 200,
+  },
+  bankrollTitle: {
+    fontSize: 30,
+  },
+  hourlyTitle: {
+    fontSize: 30,
   },
   addNewGameButton: {
-    height: 100,
-    width: 100,
-  },
-  seeStatsButton: {
-    height: 100,
-    width: 100,
+    height: 200,
+    width: 200,
   },
 });
