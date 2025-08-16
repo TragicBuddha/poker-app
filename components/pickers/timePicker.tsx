@@ -1,6 +1,6 @@
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { useState } from 'react';
-import { View, Modal, StyleSheet, TouchableOpacity, Text } from 'react-native';
+import { View, Modal, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Text } from 'react-native';
 
 
 interface timePickerModalProps {
@@ -23,20 +23,20 @@ export default function timePicker({
 
   return (
     <Modal visible={visible} transparent animationType="slide">
-      <View style={styles.overlay}>
-        <View style={styles.modal}>
-          <DateTimePicker
-            value={time}
-            mode="time"
-            display="spinner"
-            onChange={onChange}
-            style={{ backgroundColor: 'white' }}
-          />
-          <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-            <Text style={styles.closeText}>Done</Text>
-          </TouchableOpacity>
+        <View style={styles.overlay}>
+          <View style={styles.modal}>
+            <DateTimePicker
+              value={time}
+              mode="time"
+              display="spinner"
+              onChange={onChange}
+              style={{ backgroundColor: 'white' }}
+            />
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeText}>Done</Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      </View>
     </Modal>
   );
 }
@@ -45,11 +45,14 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    alignItems: 'center',
+    width: '100%'
   },
   modal: {
     backgroundColor: 'white',
     paddingBottom: 20,
+    width: '100%',
+    alignItems: 'center'
   },
   closeButton: {
     alignSelf: 'center',

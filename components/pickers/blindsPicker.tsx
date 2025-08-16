@@ -1,5 +1,5 @@
 import React from 'react';
-import {Modal, View, StyleSheet, TouchableOpacity, Text} from 'react-native';
+import {Modal, View, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Text} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 
@@ -20,21 +20,21 @@ export default function blindsPicker({
 }: blindsPickerModalProps) {
     return (
         <Modal visible={visible} transparent animationType="slide">
-            <View style={styles.overlay}>
-                <View style={styles.modal}>
-                    <Picker
-                        selectedValue={selectedValue}
-                        onValueChange={onValueChange}
-                    >
-                    {options.map((option) => (
-                        <Picker.Item label={option} value={option} key={option} />
-                    ))}
-                    </Picker>
-                    <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                        <Text style={styles.closeText}>Done</Text>
-                    </TouchableOpacity>
-                </View>
-            </View>
+          <View style={styles.overlay}>
+              <View style={styles.modal}>
+                  <Picker
+                      selectedValue={selectedValue}
+                      onValueChange={onValueChange}
+                  >
+                  {options.map((option) => (
+                      <Picker.Item label={option} value={option} key={option} />
+                  ))}
+                  </Picker>
+                  <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                      <Text style={styles.closeText}>Done</Text>
+                  </TouchableOpacity>
+              </View>
+          </View>
         </Modal>
     );
 }
@@ -43,11 +43,11 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    backgroundColor: 'rgba(0,0,0,0.5)',
   },
   modal: {
     backgroundColor: 'white',
     paddingBottom: 20,
+    width: '100%',
   },
   closeButton: {
     alignSelf: 'center',

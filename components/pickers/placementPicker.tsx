@@ -1,8 +1,9 @@
+import React from 'react';
+import {Modal, View, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Text} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { Modal, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View } from 'react-native';
 
 
-interface locationPickerModalProps {
+interface placementPickerModalProps {
     visible: boolean;
     options: string[];
     selectedValue: string;
@@ -10,13 +11,13 @@ interface locationPickerModalProps {
     onClose: () => void;
 }
 
-export default function locationPicker({
+export default function placementPicker({
     visible,
     options,
     selectedValue,
     onValueChange,
     onClose,
-}: locationPickerModalProps) {
+}: placementPickerModalProps) {
     return (
       <Modal visible={visible} transparent animationType="slide">
         <View style={styles.overlay}>
@@ -42,6 +43,7 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
+    width: '100%'
   },
   modal: {
     backgroundColor: 'white',

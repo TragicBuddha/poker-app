@@ -1,10 +1,14 @@
 // Modal that will create a newGame object containing data to send
 import React, { useState } from 'react';
+import { Keyboard } from 'react-native';
 import { Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
+import { collection, addDoc } from "firebase/firestore";
+import { db } from '/Users/hj/Desktop/ReactNative/poker-app/app/backend/firebaseConfig'
 import BlindsPicker from './pickers/blindsPicker';
 import DatePicker from './pickers/datePicker';
 import LocationPicker from './pickers/locationPicker';
 import TimePicker from './pickers/timePicker';
+import PlacementPicker from './pickers/placementPicker';
 
 // Defines our modal
 interface AddGameModalProps {
@@ -43,6 +47,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
   };
 
   // Placement and money states
+  const [totalPlayers, setTotalPlayers] = useState('')
   const [tournamentPlace, setTournamentPlace] = useState('');
   const placementOptions = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11+']
   const [cashIn, setCashIn] = useState('');
@@ -53,6 +58,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
   const [datePickerVisible, setDatePickerVisible] = useState(false);
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [locationPickerVisible, setLocationPickerVisible] = useState(false);
+  const [placementPickerVisible, setPlacementPickerVisible] = useState(false);
 
   // Function that resets our input boxes back to inital state
   const resetForm = () => {
@@ -63,6 +69,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
     setEndTime(null);
     setLocation('');
     setTournamentPlace('');
+    setTotalPlayers('')
     setCashIn('');
     setCashOut('');
   };
@@ -72,6 +79,34 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
     if (activeTimeField === 'start') setStartTime(time);
     else if (activeTimeField === 'end') setEndTime(time);
   };
+
+  const handleSaveGame = async () => {
+  try {
+    const gameData: any = {
+      gameType,
+      location,
+      gameDate: gameDate ? gameDate.toISOString() : null,
+    };
+
+    if (gameType === GameType.CASH) {
+      gameData.startTime = startTime ? startTime.toISOString() : null;
+      gameData.endTime = endTime ? endTime.toISOString() : null;
+      gameData.blindAmount = blindAmount;
+      gameData.cashIn = cashIn ? parseFloat(cashIn) : 0;
+      gameData.cashOut = cashOut ? parseFloat(cashOut) : 0;
+    } else if (gameType === GameType.TOURNAMENT) {
+      gameData.tournamentPlace = tournamentPlace;
+      gameData.totalPlayers = totalPlayers ? parseFloat(totalPlayers) : 0;
+    }
+
+    await addDoc(collection(db, "games"), gameData);
+    console.log("Game saved!");
+    resetForm();
+    onClose();
+  } catch (error) {
+    console.error("Error saving game: ", error);
+  }
+};
 
   // Rendering our modal 
   return (
@@ -121,12 +156,19 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
 
         {/*Rendering entry box's for data thats needed in just tournament play*/}
         {gameType === GameType.TOURNAMENT && (
-          <TextInput
-            value={tournamentPlace}
-            onChangeText={text => setTournamentPlace(text)}
-            placeholder="Final Placing"
-            style={styles.entryTouchable}
-          />
+          <>
+            <TouchableOpacity onPress={() => setPlacementPickerVisible(true)} style={styles.entryTouchable}>
+              <Text>
+                {tournamentPlace || 'Final Placement'}
+              </Text>
+            </TouchableOpacity>
+            <TextInput
+              value={totalPlayers}
+              onChangeText={text => setTotalPlayers(text)}
+              placeholder="Total Players"
+              style={styles.entryTouchable}
+            />
+          </>
         )}
 
         {/*Rendering entry box's for data thats needed in just cash play*/}
@@ -157,18 +199,24 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
               value={cashIn}
               onChangeText={text => setCashIn(text)}
               placeholder="Cash In"
+              keyboardType='decimal-pad'
+              blurOnSubmit={true} 
+              onEndEditing={() => Keyboard.dismiss()}
               style={styles.entryTouchable}
             />
             <TextInput
               value={cashOut}
               onChangeText={text => setCashOut(text)}
               placeholder="Cash Out"
+              keyboardType='decimal-pad'
+              blurOnSubmit={true} 
+              onEndEditing={() => Keyboard.dismiss()}
               style={styles.entryTouchable}
             />
           </>
         )}
 
-        {/* Game Type Container, lead us to other componenets */}
+        {/* Game Type Container, leed us to other componenets */}
         <View style={styles.gameTypeContainer}>
 
           <TouchableOpacity onPress={() => setGameType(GameType.CASH)} style={styles.gameTypeTouchable}>
@@ -187,9 +235,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
         </View>
 
         {/* Save Button */}
-        <TouchableOpacity onPress={() => {
-            resetForm();
-            onClose();}}
+        <TouchableOpacity onPress={handleSaveGame}
             style={styles.saveButtonContainer}>
           <ImageBackground
             source={require('../assets/images/saveGame_button.png')}
@@ -231,6 +277,14 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           : endTime ?? new Date()}
         onChangeTime={onChangeTime}
         onClose={() => setTimePickerVisible(false)}
+      />
+      <PlacementPicker
+        visible={placementPickerVisible}
+        selectedValue={tournamentPlace}
+        options={placementOptions}
+        onValueChange={(value) => {
+          setTournamentPlace(value);}}
+        onClose={() => setPlacementPickerVisible(false)}
       />
     </Modal>
   );
@@ -303,7 +357,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     justifyContent: 'center',
     alignItems: 'center',
-    alignSelf: 'center'
+    alignSelf: 'center',
+    textAlign: 'center'
   },
   saveTouchable: {
     justifyContent: 'center',
