@@ -1,9 +1,11 @@
 // Modal that will create a newGame object containing data to send
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
 import { Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, doc, updateDoc, getDoc } from "firebase/firestore";
+import { updateBankroll } from './statistics/updateBankroll';
 import { db } from '/Users/hj/Desktop/ReactNative/poker-app/app/backend/firebaseConfig'
+import { removeFocus } from '@/utilities/key_uti';
 import BlindsPicker from './pickers/blindsPicker';
 import DatePicker from './pickers/datePicker';
 import LocationPicker from './pickers/locationPicker';
@@ -25,6 +27,7 @@ enum GameType {
 // initializing our modal adding our props and creating inital variables and their state
 const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
 
+  
   // Game type state
   const [gameType, setGameType] = useState<GameType | null>(null);
 
@@ -59,6 +62,8 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
   const [timePickerVisible, setTimePickerVisible] = useState(false);
   const [locationPickerVisible, setLocationPickerVisible] = useState(false);
   const [placementPickerVisible, setPlacementPickerVisible] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false)
+
 
   // Function that resets our input boxes back to inital state
   const resetForm = () => {
@@ -79,7 +84,29 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
     if (activeTimeField === 'start') setStartTime(time);
     else if (activeTimeField === 'end') setEndTime(time);
   };
+  
+  // Function that calculates our total hours played
+  const totalHoursCalc = (startTime: Date | null, endTime: Date | null) => {
+    if (startTime && endTime && endTime < startTime) {
+      const msInDay = 24 * 60 * 60 * 1000;
+      const endTimeFix = new Date(endTime.getTime() + msInDay);
+      const milSecDiff = endTimeFix.getTime() - startTime.getTime();
+      const hours = milSecDiff / 1000 / 60 / 60;
+      return Math.round(hours);
+    } else if (startTime && endTime) {
+      const milSecDiff = endTime.getTime() - startTime.getTime();
+      const hours = milSecDiff / 1000 / 60 / 60;
+      return Math.round(hours);
+    }
+  }
 
+  // Function that calculates our total profit for a session
+  const profitLossCal = (cashIn: number, cashOut: number) => {
+    const profitLoss = cashOut - cashIn
+    return profitLoss
+  }
+
+  // Saves our game after save button is pressed
   const handleSaveGame = async () => {
   try {
     const gameData: any = {
@@ -91,14 +118,19 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
     if (gameType === GameType.CASH) {
       gameData.startTime = startTime ? startTime.toISOString() : null;
       gameData.endTime = endTime ? endTime.toISOString() : null;
+      gameData.hoursPlayed = totalHoursCalc(startTime, endTime);
       gameData.blindAmount = blindAmount;
       gameData.cashIn = cashIn ? parseFloat(cashIn) : 0;
       gameData.cashOut = cashOut ? parseFloat(cashOut) : 0;
+      gameData.profitLoss = profitLossCal(gameData.cashIn, gameData.cashOut)
     } else if (gameType === GameType.TOURNAMENT) {
       gameData.tournamentPlace = tournamentPlace;
       gameData.totalPlayers = totalPlayers ? parseFloat(totalPlayers) : 0;
+      gameData.cashIn = cashIn ? parseFloat(cashIn) : 0;
+      gameData.cashOut = cashOut ? parseFloat(cashOut) : 0;
+      gameData.profitLoss = profitLossCal(gameData.cashIn, gameData.cashOut)
     }
-
+    await updateBankroll(gameData.profitLoss)
     await addDoc(collection(db, "games"), gameData);
     console.log("Game saved!");
     resetForm();
@@ -136,13 +168,13 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
         {/*Rendering entry box's for data thats needed in both cash or tournament play*/}
         {(gameType === GameType.CASH || gameType === GameType.TOURNAMENT) && (
           <>
-            <TouchableOpacity onPress={() => setLocationPickerVisible(true)} style={styles.entryTouchable}>
+            <TouchableOpacity onPress={() => { removeFocus(); setLocationPickerVisible(true) }} style={styles.entryTouchable}>
               <Text>
                 {location || 'Location'}
               </Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setDatePickerVisible(true)} style={styles.entryTouchable}>
+            <TouchableOpacity onPress={() => { removeFocus(); setDatePickerVisible(true)}} style={styles.entryTouchable}>
               <Text>
                 {gameDate ? gameDate.toLocaleDateString([],
                 { year: 'numeric',
@@ -157,7 +189,21 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
         {/*Rendering entry box's for data thats needed in just tournament play*/}
         {gameType === GameType.TOURNAMENT && (
           <>
-            <TouchableOpacity onPress={() => setPlacementPickerVisible(true)} style={styles.entryTouchable}>
+            <TextInput
+              value={cashIn}
+              onChangeText={text => setCashIn(text)}
+              keyboardType='decimal-pad'
+              placeholder="Buy in"
+              style={styles.entryTouchable}
+            />
+            <TextInput
+              value={cashOut}
+              onChangeText={text => setCashOut(text)}
+              keyboardType='decimal-pad'
+              placeholder="We made it past the bubble?! (Cash out)"
+              style={styles.entryTouchable}
+            />
+            <TouchableOpacity onPress={() => { removeFocus(); setPlacementPickerVisible(true) }} style={styles.entryTouchable}>
               <Text>
                 {tournamentPlace || 'Final Placement'}
               </Text>
@@ -165,6 +211,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
             <TextInput
               value={totalPlayers}
               onChangeText={text => setTotalPlayers(text)}
+              keyboardType='decimal-pad'
               placeholder="Total Players"
               style={styles.entryTouchable}
             />
@@ -174,7 +221,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
         {/*Rendering entry box's for data thats needed in just cash play*/}
         {gameType === GameType.CASH && (
           <>
-            <TouchableOpacity onPress={() => openTimePicker('start')} style={styles.entryTouchable}>
+            <TouchableOpacity onPress={() => {removeFocus(); openTimePicker('start')}} style={styles.entryTouchable}>
               <Text>{startTime ? startTime.toLocaleTimeString([],
                 { hour: 'numeric',
                   minute: '2-digit'
@@ -182,14 +229,14 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
               ) : 'Start Time'}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => openTimePicker('end')} style={styles.entryTouchable}>
+            <TouchableOpacity onPress={() => {removeFocus(); openTimePicker('end')}} style={styles.entryTouchable}>
               <Text>{endTime ? endTime.toLocaleTimeString([],
                 { hour: 'numeric',
                   minute: '2-digit'
                 }) : 'End Time'}</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setBlindPickerVisible(true)} style={styles.entryTouchable}>
+            <TouchableOpacity onPress={() => {removeFocus(); setBlindPickerVisible(true)}} style={styles.entryTouchable}>
               <Text>
                 {blindAmount || 'Select Blinds'}
               </Text>
@@ -200,16 +247,17 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
               onChangeText={text => setCashIn(text)}
               placeholder="Cash In"
               keyboardType='decimal-pad'
-              blurOnSubmit={true} 
-              onEndEditing={() => Keyboard.dismiss()}
               style={styles.entryTouchable}
             />
+            
             <TextInput
               value={cashOut}
               onChangeText={text => setCashOut(text)}
               placeholder="Cash Out"
               keyboardType='decimal-pad'
-              blurOnSubmit={true} 
+              onFocus={() => {
+                if (pickerOpen) Keyboard.dismiss();
+              }}
               onEndEditing={() => Keyboard.dismiss()}
               style={styles.entryTouchable}
             />
@@ -300,8 +348,6 @@ const styles = StyleSheet.create({
   
   // Container styling's
   gameTypeContainer: {
-    borderWidth: 2,
-    borderColor: 'black',
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
@@ -313,10 +359,8 @@ const styles = StyleSheet.create({
     gap: 80,
   },
   saveButtonContainer: {
-    borderWidth: 2,
     justifyContent: 'center',
     alignItems: 'center',
-    borderColor: 'black',
     position: 'absolute',
     top: 700,
     alignSelf: 'center',
@@ -332,14 +376,10 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 15,
     alignItems: 'center',
-    borderWidth: 2,
-    borderColor: 'black'
   },
 
   // TouchableOpacity Styling's
   gameTypeTouchable: {
-    borderWidth: 2,
-    borderColor: 'black',
   },
   gameTypeImage: {
     width: 150, 
@@ -363,8 +403,6 @@ const styles = StyleSheet.create({
   saveTouchable: {
     justifyContent: 'center',
     alignItems: 'center',
-    borderColor: 'black',
-    borderWidth: 2,
     height: 150,
     width: 150,
   },
