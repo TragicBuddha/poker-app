@@ -1,5 +1,5 @@
 import React from 'react';
-import {Modal, View, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Text} from 'react-native';
+import {Modal, View, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Text, } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 
@@ -19,21 +19,25 @@ export default function placementPicker({
     onClose,
 }: placementPickerModalProps) {
     return (
-      <Modal visible={visible} transparent animationType="slide">
+      <Modal visible={visible} transparent animationType="fade">
         <View style={styles.overlay}>
-            <View style={styles.modal}>
-                <Picker
-                    selectedValue={selectedValue}
-                    onValueChange={onValueChange}
-                >
-                {options.map((option) => (
-                    <Picker.Item label={option} value={option} key={option} />
-                ))}
-                </Picker>
-                <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                    <Text style={styles.closeText}>Done</Text>
-                </TouchableOpacity>
-            </View>
+          <TouchableWithoutFeedback onPress={onClose}>
+            <View style={styles.backgroundOverlay} />
+          </TouchableWithoutFeedback>
+
+          <View style={styles.modal}>
+            <TouchableWithoutFeedback onPress={onClose}>
+              <View style={styles.backgroundOverlay} />
+            </TouchableWithoutFeedback>
+            <Picker
+              selectedValue={selectedValue}
+              onValueChange={onValueChange}
+            >
+              {options.map((option) => (
+                <Picker.Item label={option} value={option} key={option} />
+              ))}
+            </Picker>
+          </View>
         </View>
       </Modal>
     );
@@ -43,21 +47,18 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    width: '100%'
-  },
-  modal: {
-    backgroundColor: 'white',
-    paddingBottom: 20,
     width: '100%',
   },
-  closeButton: {
+  backgroundOverlay: {
+  flex: 1,
+},
+  modal: {
     alignSelf: 'center',
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#ccc',
-    borderRadius: 10,
-  },
-  closeText: {
-    fontSize: 16,
+    backgroundColor: 'white',
+    width: '90%',
+    height: 200,
+    bottom: 50,
+    left: 1,
+    borderRadius: 30,
   },
 });

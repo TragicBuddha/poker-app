@@ -19,20 +19,20 @@ export default function blindsPicker({
     onClose,
 }: blindsPickerModalProps) {
     return (
-        <Modal visible={visible} transparent animationType="slide">
+        <Modal visible={visible} transparent animationType="fade">
           <View style={styles.overlay}>
+            <TouchableWithoutFeedback onPress={onClose}>
+              <View style={styles.backgroundOverlay} />
+            </TouchableWithoutFeedback>
               <View style={styles.modal}>
-                  <Picker
-                      selectedValue={selectedValue}
-                      onValueChange={onValueChange}
-                  >
-                  {options.map((option) => (
-                      <Picker.Item label={option} value={option} key={option} />
-                  ))}
-                  </Picker>
-                  <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                      <Text style={styles.closeText}>Done</Text>
-                  </TouchableOpacity>
+                <Picker
+                    selectedValue={selectedValue}
+                    onValueChange={onValueChange}
+                >
+                {options.map((option) => (
+                    <Picker.Item label={option} value={option} key={option} />
+                ))}
+                </Picker>
               </View>
           </View>
         </Modal>
@@ -44,19 +44,15 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'flex-end',
   },
+  backgroundOverlay: {
+  flex: 1,
+  },
   modal: {
-    backgroundColor: 'white',
-    paddingBottom: 20,
-    width: '100%',
-  },
-  closeButton: {
     alignSelf: 'center',
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#ccc',
-    borderRadius: 10,
-  },
-  closeText: {
-    fontSize: 16,
+    backgroundColor: 'white',
+    width: '90%',
+    height: 200,
+    bottom: 50,
+    borderRadius: 30,
   },
 });

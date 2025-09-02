@@ -1,7 +1,7 @@
 // Modal that will create a newGame object containing data to send
 import React, { useState, useEffect } from 'react';
 import { Keyboard } from 'react-native';
-import { Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View, } from 'react-native';
+import { Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, } from 'react-native';
 import { collection, addDoc, doc, updateDoc, getDoc } from "firebase/firestore";
 import { updateBankroll } from './statistics/updateBankroll';
 import { db } from '/Users/hj/Desktop/ReactNative/poker-app/app/backend/firebaseConfig'
@@ -144,7 +144,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
   return (
     // Opening Modal and setting top wrapper as image background
     <Modal 
-      animationType="slide"
+      animationType='fade'
       visible={isVisible} 
       onRequestClose={onClose}>
       <ImageBackground
@@ -192,14 +192,14 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
             <TextInput
               value={cashIn}
               onChangeText={text => setCashIn(text)}
-              keyboardType='decimal-pad'
+              keyboardType='numbers-and-punctuation'
               placeholder="Buy in"
               style={styles.entryTouchable}
             />
             <TextInput
               value={cashOut}
               onChangeText={text => setCashOut(text)}
-              keyboardType='decimal-pad'
+              keyboardType='numbers-and-punctuation'
               placeholder="We made it past the bubble?! (Cash out)"
               style={styles.entryTouchable}
             />
@@ -208,10 +208,11 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
                 {tournamentPlace || 'Final Placement'}
               </Text>
             </TouchableOpacity>
+
             <TextInput
               value={totalPlayers}
               onChangeText={text => setTotalPlayers(text)}
-              keyboardType='decimal-pad'
+              keyboardType='numbers-and-punctuation'
               placeholder="Total Players"
               style={styles.entryTouchable}
             />
@@ -246,7 +247,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
               value={cashIn}
               onChangeText={text => setCashIn(text)}
               placeholder="Cash In"
-              keyboardType='decimal-pad'
+              keyboardType='numbers-and-punctuation'
               style={styles.entryTouchable}
             />
             
@@ -254,7 +255,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
               value={cashOut}
               onChangeText={text => setCashOut(text)}
               placeholder="Cash Out"
-              keyboardType='decimal-pad'
+              keyboardType='numbers-and-punctuation'
               onFocus={() => {
                 if (pickerOpen) Keyboard.dismiss();
               }}
@@ -272,13 +273,14 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
               source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/cashGame_button.png')}
               style={styles.gameTypeImage}
             />
-            
+            <Text style={styles.gameTypeText}>Cash</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setGameType(GameType.TOURNAMENT)} style={styles.gameTypeTouchable}>
             <Image
               source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/tournamentGame_button.png')}
               style={styles.gameTypeImage}
             />
+            <Text style={styles.gameTypeText}>Tournament</Text>
           </TouchableOpacity>
         </View>
 
@@ -364,7 +366,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 700,
     alignSelf: 'center',
-    marginTop: 20,
+    marginTop: 50,
   },
   backButtonContainer: {
     position: 'absolute',
@@ -381,10 +383,25 @@ const styles = StyleSheet.create({
   // TouchableOpacity Styling's
   gameTypeTouchable: {
   },
+
   gameTypeImage: {
     width: 150, 
     height: 150,
   },
+
+  gameTypeText: {
+    fontSize: 25,
+    textAlign: 'center',
+    top: 15,
+    borderColor: 'black',
+    borderWidth: 2,
+    backgroundColor: 'white',
+    width: 150,
+    paddingVertical: 5,
+    borderRadius: 10,
+    height: 45,
+  },
+
   entryTouchable: {
     height: 40,
     backgroundColor: 'white',

@@ -62,6 +62,7 @@ export default function HomeScreen() {
             style={styles.addNewGameButton}
             source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/entry_tab_icon.png')}
           />
+          <Text style={styles.addNewGameTitle}>New Game</Text>
         </TouchableOpacity>
         <AddGameModal
           isVisible={gameModalVisible}
@@ -83,9 +84,13 @@ const styles = StyleSheet.create({
     height: 720,
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    height: 200,
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 150,
+    bottom: 45
+    //borderWidth: 2,
+    //borderColor: 'black'
   },
 
   bankrollTitle: {
@@ -95,8 +100,22 @@ const styles = StyleSheet.create({
   hourlyTitle: {
     fontSize: 30,
   },
+
   addNewGameButton: {
-    height: 200,
+    height: 150,
     width: 200,
+    //borderWidth: 2,
   },
+
+  addNewGameTitle: {
+    fontSize: 28,
+    textAlign: 'center',
+    borderWidth: 2,
+    borderColor: 'black',
+    backgroundColor: 'white',
+    paddingVertical: 5,
+    borderRadius: 10,
+    width: 160,
+    left: 22,
+  }
 });

@@ -22,21 +22,20 @@ export default function timePicker({
   }
 
   return (
-    <Modal visible={visible} transparent animationType="slide">
-        <View style={styles.overlay}>
-          <View style={styles.modal}>
-            <DateTimePicker
-              value={time}
-              mode="time"
-              display="spinner"
-              onChange={onChange}
-              style={{ backgroundColor: 'white' }}
-            />
-            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-              <Text style={styles.closeText}>Done</Text>
-            </TouchableOpacity>
-          </View>
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={styles.overlay}>
+        <TouchableWithoutFeedback onPress={onClose}>
+          <View style={styles.backgroundOverlay} />
+        </TouchableWithoutFeedback>
+        <View style={styles.modal}>
+          <DateTimePicker
+            value={time}
+            mode="time"
+            display="spinner"
+            onChange={onChange}
+          />
         </View>
+      </View>
     </Modal>
   );
 }
@@ -45,23 +44,18 @@ const styles = StyleSheet.create({
   overlay: {
     flex: 1,
     justifyContent: 'flex-end',
-    alignItems: 'center',
-    width: '100%'
+  },
+  backgroundOverlay: {
+  flex: 1,
   },
   modal: {
-    backgroundColor: 'white',
-    paddingBottom: 20,
-    width: '100%',
-    alignItems: 'center'
-  },
-  closeButton: {
     alignSelf: 'center',
-    marginTop: 10,
-    padding: 10,
-    backgroundColor: '#ccc',
-    borderRadius: 10,
-  },
-  closeText: {
-    fontSize: 16,
+    alignItems: 'center',
+    backgroundColor: 'white',
+    width: '90%',
+    height: 200,
+    bottom: 50,
+    left: 1,
+    borderRadius: 30,
   },
 });
