@@ -4,7 +4,7 @@ import { Keyboard } from 'react-native';
 import { Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, } from 'react-native';
 import { collection, addDoc, doc, updateDoc, getDoc } from "firebase/firestore";
 import { updateBankroll } from './statistics/updateBankroll';
-import { db } from '/Users/hj/Desktop/ReactNative/poker-app/app/backend/firebaseConfig'
+import { db } from '../backend/firebaseConfig'
 import { removeFocus } from '@/utilities/key_uti';
 import BlindsPicker from './pickers/blindsPicker';
 import DatePicker from './pickers/datePicker';

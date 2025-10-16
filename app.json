@@ -8,7 +8,8 @@
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tragicbuddha.pokerapp"
     },
     "plugins": [
       "expo-router",
@@ -24,6 +25,9 @@
     ],
     "experiments": {
       "typedRoutes": true
+    },
+    "android": {
+      "package": "com.tragicbuddha.pokerapp"
     }
   }
 }

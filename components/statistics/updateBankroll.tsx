@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { updateDoc, getDoc, doc } from "firebase/firestore";
-import { db } from '/Users/hj/Desktop/ReactNative/poker-app/app/backend/firebaseConfig'
+import { db } from '../../backend/firebaseConfig'
 
 
 // Function that updates our bankroll when handleSaveGame is called
