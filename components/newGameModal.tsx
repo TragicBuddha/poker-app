@@ -1,16 +1,15 @@
 // Modal that will create a newGame object containing data to send
-import React, { useState, useEffect } from 'react';
-import { Keyboard } from 'react-native';
-import { Image, ImageBackground, Modal, StyleSheet, Text, TextInput, TouchableOpacity, TouchableWithoutFeedback, View, } from 'react-native';
-import { collection, addDoc, doc, updateDoc, getDoc } from "firebase/firestore";
-import { updateBankroll } from './statistics/updateBankroll';
-import { db } from '../backend/firebaseConfig'
 import { removeFocus } from '@/utilities/key_uti';
+import { addDoc, collection } from "firebase/firestore";
+import React, { useState } from 'react';
+import { Image, ImageBackground, Keyboard, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { db } from '../backend/firebaseConfig';
 import BlindsPicker from './pickers/blindsPicker';
 import DatePicker from './pickers/datePicker';
 import LocationPicker from './pickers/locationPicker';
-import TimePicker from './pickers/timePicker';
 import PlacementPicker from './pickers/placementPicker';
+import TimePicker from './pickers/timePicker';
+import { updateBankroll } from './statistics/updateBankroll';
 
 // Defines our modal
 interface AddGameModalProps {
@@ -148,7 +147,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
       visible={isVisible} 
       onRequestClose={onClose}>
       <ImageBackground
-        source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/app_background.png')}
+        source={require('../assets/images/app_background.png')}
         style={styles.background}
       >
         {/* Back Button */}
@@ -270,14 +269,14 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
 
           <TouchableOpacity onPress={() => setGameType(GameType.CASH)} style={styles.gameTypeTouchable}>
             <Image
-              source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/cashGame_button.png')}
+              source={require('../assets/images/cashGame_button.png')}
               style={styles.gameTypeImage}
             />
             <Text style={styles.gameTypeText}>Cash</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setGameType(GameType.TOURNAMENT)} style={styles.gameTypeTouchable}>
             <Image
-              source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/tournamentGame_button.png')}
+              source={require('../assets/images/tournamentGame_button.png')}
               style={styles.gameTypeImage}
             />
             <Text style={styles.gameTypeText}>Tournament</Text>

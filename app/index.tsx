@@ -1,9 +1,9 @@
-import { View, Image, Text, Button, StyleSheet, ImageBackground, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react'
-import AddGameModal from '../components/newGameModal';
-import { collection, getDoc, getDocs, doc, onSnapshot } from "firebase/firestore";
-import { db } from '../backend/firebaseConfig'
+import { collection, doc, onSnapshot } from "firebase/firestore";
+import React, { useEffect, useState } from 'react';
+import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { db } from '../backend/firebaseConfig';
 import BankrollChart from '../components/charts/bankrollChart';
+import AddGameModal from '../components/newGameModal';
 
 
 export default function HomeScreen() {
@@ -65,7 +65,7 @@ export default function HomeScreen() {
   // JSX Render, displays and layers our components onto the screen
   return (
     <ImageBackground
-      source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/app_background.png')}
+      source={require('../assets/images/app_background.png')}
       style={styles.container}
     >
       <View style={styles.statContainer}>
@@ -87,7 +87,7 @@ export default function HomeScreen() {
         <TouchableOpacity onPress={toggleGameModal}>
           <Image
             style={styles.addNewGameButton}
-            source={require('/Users/hj/Desktop/ReactNative/poker-app/assets/images/entry_tab_icon.png')}
+            source={require('../assets/images/entry_tab_icon.png')}
           />
           <Text style={styles.addNewGameTitle}>New Game</Text>
         </TouchableOpacity>
