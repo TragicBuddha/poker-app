@@ -3,6 +3,13 @@
 # backend
 backend/firebaseConfig.js
 
+# Config & dependencies
+app.json
+eslint.config.js
+package-lock.json
+package.json
+tsconfig.json
+
 # dependencies
 node_modules/
 
