@@ -3,7 +3,7 @@
 
 React Native + Expo mobile app for tracking poker sessions, bankroll, and real-time analytics.
 
-<img src="/Users/hj/Documents/ReactNative/poker-app/assets/images/GitHub/MainScreen.PNG" width="300" height="600">
+<img src="/assets/images/GitHub/MainScreen.PNG" width="300" height="600">
 
 ## Features
 - Track cash games and tournaments with session details (blinds, location, buy-in/out)
