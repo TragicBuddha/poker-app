@@ -21,6 +21,4 @@ Backend:
 - Firestore listeners
 
 ## Screenshots
-<img src="/assets/images/GitHub/MainScreen.PNG" width="300" height="600"><img src="/assets/images/GitHub/NewGameModal.PNG" width="300" height="600">
-<img src="/assets/images/GitHub/PickerDisplay.PNG" width="300" height="600">
-<img src="/assets/images/GitHub/Picker2Display.PNG" width="300" height="600">
+<img src="/assets/images/GitHub/MainScreen.PNG" width="200" height="500"> <img src="/assets/images/GitHub/NewGameModal.PNG" width="200" height="500"> <img src="/assets/images/GitHub/PickerDisplay.PNG" width="200" height="500"> <img src="/assets/images/GitHub/Picker2Display.PNG" width="200" height="500">
