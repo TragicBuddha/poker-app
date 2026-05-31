@@ -1,10 +1,8 @@
-import { collection, doc, onSnapshot } from "firebase/firestore";
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { db } from '../backend/firebaseConfig';
 import BankrollChart from '../components/charts/bankrollChart';
+import AddGameModal from '../components/modals/newGameModal';
 import StatsModal from '../components/modals/statsModal';
-import AddGameModal from '../components/newGameModal';
 
 
 export default function HomeScreen() {
@@ -13,47 +11,6 @@ export default function HomeScreen() {
   const [gameModalVisible, setGameModalVisible] = useState(false);
   // Not setup yet
   const [statsModalVisible, setStatsModalVisible] = useState(false);
-  const [bankroll, setBankroll] = useState(0);
-  const [hourlyEarning, setHourlyEarning] = useState(0);
-  const [tournamentEarnings, setTournamentEarnings] = useState(0);
-
-  // useEffect = will run everything inside when component loads (at start for this use)
-  useEffect(() => {
-    // Real-time listener from firestore, is listening for bankroll data from firestore *READ FIRESTORE DOC/CERT.*
-    // bankrollRef = address reference to bankroll data
-    // unsubscribeBankroll = onSnapshot will fetch data and start listening, then returns function that turns off the listener when var is called 
-    const bankrollRef = doc(db, "bankroll", "main");
-    const unsubscribeBankroll = onSnapshot(bankrollRef, (docSnap) => {
-      if (docSnap.exists()) setBankroll(docSnap.data().total);
-    });
-
-    // Real-time listener from firestore, is listening for bankroll data from firestore *READ FIRESTORE DOC/CERT.*
-    // gamesCollectionRef = address reference to data on for all games
-    // unsubscribeGames = onSnapshot will fetch data and start listening, then returns function that turns off the listener when var is called 
-    const gamesCollectionRef = collection(db, "games");
-    const unsubscribeGames = onSnapshot(gamesCollectionRef, (snapshot) => {
-
-      //*CALCULATION SECTION* Is here so it can continue to update as firestore listens
-      const hoursArray = snapshot.docs.map(doc => doc.data().hoursPlayed || 0);
-      const totalHours = hoursArray.reduce((acc, curr) => acc + curr, 0);
-      const totalProfit = snapshot.docs
-        .map(doc => doc.data().profitLoss || 0)
-        .reduce((acc, curr) => acc + curr, 0);
-      const hourly = totalHours > 0 ? totalProfit / totalHours : 0;
-      setHourlyEarning(hourly);
-      const tournamentTotal = snapshot.docs
-        .filter(doc => doc.data().gameType === "TOURNAMENT")
-        .map(doc => doc.data().profitLoss || 0)
-        .reduce((acc, curr) => acc + curr, 0);
-      setTournamentEarnings(tournamentTotal);
-    });
-
-    // Anything in return statement unloads when the component closes (when we close the app in this use)
-    return () => {
-      unsubscribeBankroll();
-      unsubscribeGames();
-    };
-  }, []);
 
   // Toggle functions for displaying components
   const toggleGameModal = () => {
@@ -69,10 +26,6 @@ export default function HomeScreen() {
       source={require('../assets/images/app_background.png')}
       style={styles.container}
     >
-      <View style={styles.statContainer}>
-        <Text style={styles.hourlyTitle}>Cash Earnings: ${hourlyEarning}/HR</Text>
-        <Text style={styles.tournamentTitle}>Tournament Earnings: ${tournamentEarnings}</Text>
-      </View>
       <View style={styles.chartContainer}>
         <BankrollChart
           bankroll={bankroll}
