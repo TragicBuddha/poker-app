@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { db } from '../backend/firebaseConfig';
 import BankrollChart from '../components/charts/bankrollChart';
+import StatsModal from '../components/modals/statsModal';
 import AddGameModal from '../components/newGameModal';
 
 
@@ -84,17 +85,22 @@ export default function HomeScreen() {
         />
       </View>
       <View style={styles.buttonContainer}>
+        <TouchableOpacity onPress={toggleStatsModal}>
+          <Image style={styles.statsButton} source={require('../assets/images/stats_button.png')}/>
+          <Text style={styles.statsTitle}>Stats</Text>
+        </TouchableOpacity>
         <TouchableOpacity onPress={toggleGameModal}>
-          <Image
-            style={styles.addNewGameButton}
-            source={require('../assets/images/entry_tab_icon.png')}
-          />
+          <Image style={styles.addNewGameButton} source={require('../assets/images/entry_tab_icon.png')}/>
           <Text style={styles.addNewGameTitle}>New Game</Text>
         </TouchableOpacity>
         <AddGameModal
           isVisible={gameModalVisible}
           onClose={toggleGameModal}
         ></AddGameModal>
+        <StatsModal
+          isVisible={statsModalVisible}
+          onClose={toggleStatsModal}
+        ></StatsModal>
       </View>
     </ImageBackground>
   );
@@ -113,8 +119,6 @@ const styles = StyleSheet.create({
     marginTop: 85,
     paddingTop: 40,
     height: 200,
-    //borderWidth: 2,
-    //borderColor: 'black'
   },
   chartContainer: {
     flexDirection: 'column',
@@ -123,18 +127,16 @@ const styles = StyleSheet.create({
     height: 250,
     marginTop: 0,
     marginBottom: 200,
-    //borderColor: 'black',
-    //borderWidth: 2
   },
 
   buttonContainer: {
-    flexDirection: 'column',
-    justifyContent: 'center',
+    flexDirection: 'row',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
     height: 150,
     bottom: 45,
-    //borderWidth: 2,
-    //borderColor: 'black'
+    borderWidth: 2,
+    borderColor: 'black'
   },
 
   bankrollTitle: {
@@ -152,7 +154,8 @@ const styles = StyleSheet.create({
   addNewGameButton: {
     height: 150,
     width: 200,
-    //borderWidth: 2,
+    borderWidth: 2,
+    borderColor: 'black'
   },
 
   addNewGameTitle: {
@@ -165,5 +168,26 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     width: 160,
     left: 22,
-  }
+  },
+  
+  statsButton: {
+    height: 165,
+    width: 200,
+    bottom: 7,
+    borderWidth: 2,
+    borderColor: 'black'
+  },
+
+  statsTitle: {
+    fontSize: 28,
+    textAlign: 'center',
+    backgroundColor: 'white',
+    paddingVertical: 5,
+    borderWidth: 2,
+    borderColor: 'black',
+    borderRadius: 10,
+    width: 160,
+    left: 15,
+    bottom: 5,
+  },
 });
