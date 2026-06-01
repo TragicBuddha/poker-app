@@ -3,13 +3,13 @@ import { removeFocus } from '@/utilities/key_uti';
 import { addDoc, collection } from "firebase/firestore";
 import React, { useState } from 'react';
 import { Image, ImageBackground, Keyboard, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { db } from '../backend/firebaseConfig';
-import BlindsPicker from './pickers/blindsPicker';
-import DatePicker from './pickers/datePicker';
-import LocationPicker from './pickers/locationPicker';
-import PlacementPicker from './pickers/placementPicker';
-import TimePicker from './pickers/timePicker';
-import { updateBankroll } from './statistics/updateBankroll';
+import { db } from '../../backend/firebaseConfig';
+import BlindsPicker from '../pickers/blindsPicker';
+import DatePicker from '../pickers/datePicker';
+import LocationPicker from '../pickers/locationPicker';
+import PlacementPicker from '../pickers/placementPicker';
+import TimePicker from '../pickers/timePicker';
+import { updateBankroll } from '../statistics/updateBankroll';
 
 // Defines our modal
 interface AddGameModalProps {
@@ -147,7 +147,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
       visible={isVisible} 
       onRequestClose={onClose}>
       <ImageBackground
-        source={require('../assets/images/app_background.png')}
+        source={require('../../assets/images/app_background.png')}
         style={styles.background}
       >
         {/* Back Button */}
@@ -157,7 +157,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
           style={styles.backButtonContainer}>
           <View style={styles.backButton}>
             <Image
-              source={require('../assets/images/exit_button.png')}
+              source={require('../../assets/images/exit_button.png')}
               style={styles.backButtonImage}
             />
             <Text style={styles.backButtonText}>Back</Text>
@@ -269,14 +269,14 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
 
           <TouchableOpacity onPress={() => setGameType(GameType.CASH)} style={styles.gameTypeTouchable}>
             <Image
-              source={require('../assets/images/cashGame_button.png')}
+              source={require('../../assets/images/cashGame_button.png')}
               style={styles.gameTypeImage}
             />
             <Text style={styles.gameTypeText}>Cash</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => setGameType(GameType.TOURNAMENT)} style={styles.gameTypeTouchable}>
             <Image
-              source={require('../assets/images/tournamentGame_button.png')}
+              source={require('../../assets/images/tournamentGame_button.png')}
               style={styles.gameTypeImage}
             />
             <Text style={styles.gameTypeText}>Tournament</Text>
@@ -287,7 +287,7 @@ const AddGameModal: React.FC<AddGameModalProps> = ({ isVisible, onClose }) => {
         <TouchableOpacity onPress={handleSaveGame}
             style={styles.saveButtonContainer}>
           <ImageBackground
-            source={require('../assets/images/saveGame_button.png')}
+            source={require('../../assets/images/saveGame_button.png')}
             style={styles.saveTouchable}
           >
             <Text style={styles.saveButtonText}>Save</Text>

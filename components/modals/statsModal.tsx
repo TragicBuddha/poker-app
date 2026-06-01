@@ -1,8 +1,7 @@
+import BankrollChart from '@/components/charts/bankrollChart';
+import { usePokerStats } from '@/hooks/usePokerStats';
 import React from 'react';
 import { Image, ImageBackground, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import hourlyEarning from hourCals;
-import tournamentEarnings from hourCals;
-w
 
 
 // Defines our modal
@@ -12,15 +11,22 @@ interface StatsModalProps {
 }
 
 const StatsModal: React.FC<StatsModalProps> = ({ isVisible, onClose }) => {
-// Rendering our modal 
-// Rendering our modal 
-  return (
+// Rendering our modal
+
+    const {
+        bankroll,
+        hourlyEarning,
+        tournamentTotal,
+        cashTotal,
+    } = usePokerStats();
+
+    return (
     // Opening Modal and setting top wrapper as image background
     <Modal 
         animationType='fade'
         visible={isVisible} 
         onRequestClose={onClose}>
-        <ImageBackground source={require('../../assets/images/app_background.png')} style={styles.background}></ImageBackground>
+        <ImageBackground source={require('../../assets/images/app_background.png')} style={styles.background}>
             {/* Back Button */}
             <TouchableOpacity onPress={() => {
             onClose();}}
@@ -35,9 +41,21 @@ const StatsModal: React.FC<StatsModalProps> = ({ isVisible, onClose }) => {
             </TouchableOpacity>
             {/* Stats Information Top View*/}
             <View style={styles.statContainer}>
-                <Text style={styles.hourlyTitle}>Cash Earnings: ${hourlyEarning}/HR</Text>
-                <Text style={styles.tournamentTitle}>Tournament Earnings: ${tournamentEarnings}</Text>
+                <Text style={styles.hourlyTitle}>Hourly Earnings: ${hourlyEarning.toFixed(2)}/HR</Text>
+                <Text style={styles.tournamentTitle}>Tournament Earnings: ${tournamentTotal}</Text>
+                <View style={styles.chartContainer}>
+                    <BankrollChart
+                        bankroll={bankroll}
+                        tournamentEarnings={tournamentTotal}
+                        cashEarnings={bankroll - tournamentTotal}
+                        radius={150}
+                        strokeWidth={25}
+                        tournamentColor='black'
+                        cashColor='white'
+                    />
+                </View>
             </View>
+        </ImageBackground>
     </Modal>
   );
 };
@@ -60,9 +78,19 @@ const styles = StyleSheet.create({
     statContainer: {
     flexDirection: 'column',
     alignItems: 'center',
-    marginTop: 85,
+    marginTop: 30,
     paddingTop: 40,
-    height: 200,
+    height: '100%',
+    borderColor: 'black',
+    borderWidth: 2,
+    },
+
+    chartContainer: {
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: 250,
+    
     },
 
     backButtonContainer: {
@@ -78,6 +106,7 @@ const styles = StyleSheet.create({
 
     tournamentTitle: {
     fontSize: 30,
+    paddingBottom: 50,
     },
 
 

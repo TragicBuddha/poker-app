@@ -1,9 +1,7 @@
+import AddGameModal from '@/components/modals/newGameModal';
+import StatsModal from '@/components/modals/statsModal';
 import React, { useState } from 'react';
 import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import BankrollChart from '../components/charts/bankrollChart';
-import AddGameModal from '../components/modals/newGameModal';
-import StatsModal from '../components/modals/statsModal';
-
 
 export default function HomeScreen() {
   // useState is React's fiber tree (a table) for things we want to render, gives us the ability to re-render on the fly
@@ -26,17 +24,6 @@ export default function HomeScreen() {
       source={require('../assets/images/app_background.png')}
       style={styles.container}
     >
-      <View style={styles.chartContainer}>
-        <BankrollChart
-          bankroll={bankroll}
-          tournamentEarnings={tournamentEarnings}
-          cashEarnings={bankroll - tournamentEarnings}
-          radius={150}
-          strokeWidth={25}
-          tournamentColor='black'
-          cashColor='white'
-        />
-      </View>
       <View style={styles.buttonContainer}>
         <TouchableOpacity onPress={toggleStatsModal}>
           <Image style={styles.statsButton} source={require('../assets/images/stats_button.png')}/>
@@ -66,28 +53,13 @@ const styles = StyleSheet.create({
     width: '100%',
     height: '100%',
   },
-  statContainer: {
-    flexDirection: 'column',
-    alignItems: 'center',
-    marginTop: 85,
-    paddingTop: 40,
-    height: 200,
-  },
-  chartContainer: {
-    flexDirection: 'column',
-    justifyContent: 'center',
-    alignItems: 'center',
-    height: 250,
-    marginTop: 0,
-    marginBottom: 200,
-  },
 
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-evenly',
     alignItems: 'center',
     height: 150,
-    bottom: 45,
+    top: 675,
     borderWidth: 2,
     borderColor: 'black'
   },
