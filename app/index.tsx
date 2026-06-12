@@ -1,118 +1,176 @@
-import AddGameModal from '@/components/modals/newGameModal';
-import StatsModal from '@/components/modals/statsModal';
-import React, { useState } from 'react';
-import { Image, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import LastSignedInQR from '@/components/LastSignedInQR';
+import ReturningPlayers from '@/components/ReturningPlayers';
+import SignInForm from '@/components/SignInForm';
+import ManageGameModal from '@/components/modals/ManageGameModal';
+import TournamentModal from '@/components/modals/TournamentModal';
+import { useCurrentSession } from '@/hooks/useCurrentSession';
+import { Player, useRoster } from '@/hooks/useRoster';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 export default function HomeScreen() {
-  // useState is React's fiber tree (a table) for things we want to render, gives us the ability to re-render on the fly
-  // Variable declarations
-  const [gameModalVisible, setGameModalVisible] = useState(false);
-  // Not setup yet
-  const [statsModalVisible, setStatsModalVisible] = useState(false);
+  const [tournamentVisible, setTournamentVisible] = useState(false);
+  const [manageVisible, setManageVisible] = useState(false);
+  const [lastSignedIn, setLastSignedIn] = useState<Player | null>(null);
+  const [webAutoStart, setWebAutoStart] = useState(false);
+  const prevGameActiveRef = useRef<boolean>(false);
+  const todaySessionId = new Date().toISOString().split('T')[0];
 
-  // Toggle functions for displaying components
-  const toggleGameModal = () => {
-    setGameModalVisible(!gameModalVisible);
-  };
-  const toggleStatsModal = () => {
-    setStatsModalVisible(!statsModalVisible);
+  const { players, loading } = useRoster();
+  const { session, sessionPlayers, signedInIds, playerCount, addPlayerToSession, removePlayerFromSession, updateSession, resetSession } = useCurrentSession();
+
+  useEffect(() => {
+    const isNowActive = session?.gameActive ?? false;
+    if (isNowActive && !prevGameActiveRef.current) {
+      setTournamentVisible(true);
+      setWebAutoStart(true);
+    }
+    prevGameActiveRef.current = isNowActive;
+  }, [session?.gameActive]);
+
+  const handleNewGame = () => {
+    Alert.alert(
+      'New Game?',
+      'This will delete the session and remove all signed-in players.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'New Game', style: 'destructive', onPress: async () => {
+            await resetSession();
+            setLastSignedIn(null);
+          }
+        },
+      ]
+    );
   };
 
-  // JSX Render, displays and layers our components onto the screen
   return (
     <ImageBackground
       source={require('../assets/images/app_background.png')}
       style={styles.container}
+      resizeMode="cover"
     >
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity onPress={toggleStatsModal}>
-          <Image style={styles.statsButton} source={require('../assets/images/stats_button.png')}/>
-          <Text style={styles.statsTitle}>Stats</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={toggleGameModal}>
-          <Image style={styles.addNewGameButton} source={require('../assets/images/entry_tab_icon.png')}/>
-          <Text style={styles.addNewGameTitle}>New Game</Text>
-        </TouchableOpacity>
-        <AddGameModal
-          isVisible={gameModalVisible}
-          onClose={toggleGameModal}
-        ></AddGameModal>
-        <StatsModal
-          isVisible={statsModalVisible}
-          onClose={toggleStatsModal}
-        ></StatsModal>
+      <Text style={styles.title}>Eric's Monday Mayhem</Text>
+
+      <View style={styles.body}>
+        <View style={styles.column}>
+          <SignInForm
+            onSignedIn={(id, firstName, lastName) => {
+              addPlayerToSession(id, firstName, lastName);
+              setLastSignedIn({ id, firstName, lastName, lifetimeFinishes: [] });
+            }}
+          />
+          <LastSignedInQR
+            lastPlayer={lastSignedIn}
+            signedInPlayers={players.filter(p => signedInIds.includes(p.id))}
+            sessionId={todaySessionId}
+            onDismiss={() => setLastSignedIn(null)}
+          />
+        </View>
+
+        <View style={styles.divider} />
+
+        <View style={styles.column}>
+          <ReturningPlayers
+            players={players}
+            loading={loading}
+            signedInIds={signedInIds}
+            onSelect={player => {
+              addPlayerToSession(player.id, player.firstName, player.lastName);
+              setLastSignedIn(player);
+            }}
+            onRemove={player => removePlayerFromSession(player.id)}
+            onShowQR={player => setLastSignedIn(player)}
+          />
+        </View>
       </View>
+
+      <View style={styles.bottomButtons}>
+        <TouchableOpacity onPress={() => setManageVisible(true)} style={styles.button}>
+          <Text style={styles.buttonText}>Manage Game</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={handleNewGame} style={[styles.button, styles.newGameButton]}>
+          <Text style={[styles.buttonText, styles.newGameText]}>New Game</Text>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => setTournamentVisible(true)} style={styles.button}>
+          <Text style={styles.buttonText}>Start Game</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ManageGameModal
+        isVisible={manageVisible}
+        onClose={() => setManageVisible(false)}
+        session={session}
+        sessionPlayers={sessionPlayers}
+        allPlayers={players}
+        playerCount={playerCount}
+        onUpdate={updateSession}
+      />
+      <TournamentModal
+        isVisible={tournamentVisible}
+        onClose={() => { setTournamentVisible(false); setWebAutoStart(false); }}
+        playerCount={playerCount}
+        autoStart={webAutoStart}
+      />
     </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex:1,
-    resizeMode: 'cover',
-    width: '100%',
-    height: '100%',
-  },
-
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
+    flex: 1,
     alignItems: 'center',
-    height: 150,
-    top: 675,
-    borderWidth: 2,
-    borderColor: 'black'
+    paddingTop: 60,
+    paddingBottom: 60,
+    paddingHorizontal: 40,
   },
-
-  bankrollTitle: {
-    fontSize: 30,
-  },
-
-  hourlyTitle: {
-    fontSize: 30,
-  },
-
-  tournamentTitle: {
-    fontSize: 30,
-  },
-
-  addNewGameButton: {
-    height: 150,
-    width: 200,
-    borderWidth: 2,
-    borderColor: 'black'
-  },
-
-  addNewGameTitle: {
-    fontSize: 28,
+  title: {
+    color: '#FFD700',
+    fontSize: 52,
+    fontWeight: 'bold',
     textAlign: 'center',
-    backgroundColor: 'white',
-    paddingVertical: 5,
-    borderWidth: 2,
-    borderColor: 'black',
-    borderRadius: 10,
-    width: 160,
-    left: 22,
+    letterSpacing: 2,
+    marginBottom: 40,
+    textShadowColor: 'rgba(0,0,0,0.8)',
+    textShadowOffset: { width: 2, height: 2 },
+    textShadowRadius: 6,
   },
-  
-  statsButton: {
-    height: 165,
-    width: 200,
-    bottom: 7,
-    borderWidth: 2,
-    borderColor: 'black'
+  body: {
+    flex: 1,
+    flexDirection: 'row',
+    width: '100%',
+    gap: 30,
   },
-
-  statsTitle: {
-    fontSize: 28,
-    textAlign: 'center',
-    backgroundColor: 'white',
-    paddingVertical: 5,
-    borderWidth: 2,
-    borderColor: 'black',
-    borderRadius: 10,
-    width: 160,
-    left: 15,
-    bottom: 5,
+  column: {
+    flex: 1,
+  },
+  divider: {
+    width: 1,
+    backgroundColor: 'rgba(255,215,0,0.2)',
+  },
+  bottomButtons: {
+    flexDirection: 'row',
+    gap: 20,
+    marginTop: 30,
+  },
+  button: {
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    paddingVertical: 20,
+    paddingHorizontal: 40,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255,215,0,0.5)',
+  },
+  newGameButton: {
+    borderColor: 'rgba(192,57,43,0.6)',
+  },
+  newGameText: {
+    color: 'rgba(220,80,60,1)',
+  },
+  buttonText: {
+    color: '#FFD700',
+    fontSize: 24,
+    fontWeight: 'bold',
+    letterSpacing: 1,
   },
 });

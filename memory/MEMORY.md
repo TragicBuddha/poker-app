@@ -1,0 +1,1 @@
+- [Project State](project_state.md) — v2 branch: blind timer, player sign-in, Firestore players collection, returning players list

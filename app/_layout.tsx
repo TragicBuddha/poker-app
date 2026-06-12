@@ -19,7 +19,7 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
-          <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="index" options={{ headerShown: false, contentStyle: { backgroundColor: 'black' } }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Eric's Monday Mayhem</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0d1f0d;
+      color: white;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+    .container { max-width: 480px; margin: 0 auto; padding: 16px; padding-top: 24px; }
+
+    /* Timer */
+    .timer-card {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 16px;
+      padding: 20px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .timer-level { color: #FFD700; font-size: 1rem; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px; }
+    .timer-blinds { color: white; font-size: 2rem; font-weight: bold; margin-bottom: 4px; }
+    .timer-countdown { color: white; font-size: 3.5rem; font-weight: bold; line-height: 1; margin: 8px 0; }
+    .timer-next { color: rgba(255,255,255,0.45); font-size: 0.85rem; margin-top: 4px; }
+    .timer-paused { color: #e67e22; font-size: 0.8rem; margin-top: 6px; font-style: italic; }
+
+    /* Player dashboard */
+    .my-card {
+      background: rgba(39,174,96,0.2);
+      border: 2px solid #27ae60;
+      border-radius: 20px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .my-name { color: white; font-size: 2.2rem; font-weight: bold; margin-bottom: 10px; letter-spacing: 1px; }
+    .chips-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .chips-label { color: rgba(255,255,255,0.6); font-size: 1rem; }
+    .chips-display { color: #FFD700; font-size: 2rem; font-weight: bold; }
+    .chip-buttons { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+    .chip-btn {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.2);
+      border-radius: 10px;
+      color: white;
+      font-size: 0.9rem;
+      font-weight: bold;
+      padding: 10px 14px;
+      cursor: pointer;
+      min-width: 60px;
+    }
+    .chip-btn.positive { border-color: rgba(39,174,96,0.5); color: #2ecc71; }
+    .chip-btn.negative { border-color: rgba(192,57,43,0.5); color: #e74c3c; }
+    .chip-btn:active { opacity: 0.7; }
+
+    /* Standings */
+    .section-title {
+      color: #FFD700;
+      font-size: 0.9rem;
+      font-weight: bold;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .standings { background: rgba(0,0,0,0.4); border-radius: 12px; overflow: hidden; margin-bottom: 16px; }
+    .standing-row {
+      display: flex;
+      align-items: center;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      gap: 12px;
+    }
+    .standing-row:last-child { border-bottom: none; }
+    .standing-row.me { background: rgba(39,174,96,0.12); }
+    .standing-row.eliminated { opacity: 0.4; }
+    .standing-rank { color: rgba(255,255,255,0.4); font-size: 0.85rem; min-width: 24px; }
+    .standing-name { flex: 1; color: white; font-size: 1rem; }
+    .standing-name.me { color: #2ecc71; font-weight: bold; }
+    .standing-chips { color: #FFD700; font-weight: bold; font-size: 1rem; }
+    .standing-chips.eliminated { color: rgba(255,255,255,0.3); }
+
+    /* Game info */
+    .info-card {
+      background: rgba(0,0,0,0.4);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-around;
+    }
+    .info-item { text-align: center; }
+    .info-value { color: #FFD700; font-size: 1.2rem; font-weight: bold; }
+    .info-label { color: rgba(255,255,255,0.45); font-size: 0.75rem; margin-top: 2px; }
+
+    .loading { text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.4); }
+    .spinner { font-size: 2rem; animation: spin 1s linear infinite; display: inline-block; margin-bottom: 12px; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Admin panel */
+    .admin-panel {
+      margin-bottom: 16px;
+    }
+    .admin-card {
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,215,0,0.2);
+      border-radius: 16px;
+      padding: 18px;
+      margin-bottom: 12px;
+    }
+    .admin-card-title {
+      color: #FFD700;
+      font-size: 0.8rem;
+      font-weight: bold;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .timer-btn {
+      width: 100%;
+      padding: 12px;
+      border-radius: 10px;
+      border: none;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      letter-spacing: 1px;
+    }
+    .timer-btn.pause { background: #e67e22; color: white; }
+    .timer-btn.resume { background: #27ae60; color: white; }
+    .timer-btn:active { opacity: 0.75; }
+    .admin-player-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      gap: 10px;
+    }
+    .admin-player-row:last-child { border-bottom: none; }
+    .admin-player-name { flex: 1; color: white; font-size: 0.95rem; }
+    .admin-player-chips { color: #FFD700; font-weight: bold; font-size: 0.95rem; min-width: 40px; text-align: right; }
+    .elim-btn {
+      background: rgba(192,57,43,0.8);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      font-size: 0.8rem;
+      font-weight: bold;
+      padding: 6px 12px;
+      cursor: pointer;
+    }
+    .elim-btn:active { opacity: 0.7; }
+    .admin-chip-btns { display: flex; gap: 4px; }
+    .admin-chip-btn {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 7px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      padding: 5px 8px;
+      cursor: pointer;
+    }
+    .admin-chip-btn.pos { color: #2ecc71; border-color: rgba(39,174,96,0.4); }
+    .admin-chip-btn.neg { color: #e74c3c; border-color: rgba(192,57,43,0.4); }
+    .admin-chip-btn:active { opacity: 0.6; }
+    .info-edit-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid #FFD700;
+      color: #FFD700;
+      font-size: 1.2rem;
+      font-weight: bold;
+      text-align: center;
+      width: 70px;
+      outline: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div id="loading" class="loading">
+      <div class="spinner">♠</div>
+      <div>Connecting to game...</div>
+    </div>
+
+    <div id="app" style="display:none">
+      <!-- Timer -->
+      <div class="timer-card">
+        <div class="timer-level" id="timer-level">—</div>
+        <div class="timer-blinds" id="timer-blinds">—</div>
+        <div class="timer-countdown" id="timer-countdown">--:--</div>
+        <div class="timer-next" id="timer-next"></div>
+        <div class="timer-paused" id="timer-paused" style="display:none">⏸ Timer paused</div>
+      </div>
+
+      <!-- My Dashboard (shown when identified) -->
+      <div id="my-card" class="my-card" style="display:none">
+        <div id="my-name" class="my-name"></div>
+        <div class="chips-row">
+          <span class="chips-label">Chip Stack</span>
+          <span id="my-chips" class="chips-display">$25</span>
+        </div>
+        <div class="chip-buttons">
+          <button class="chip-btn positive" onclick="adjustChips(50)">+50</button>
+          <button class="chip-btn positive" onclick="adjustChips(25)">+25</button>
+          <button class="chip-btn negative" onclick="adjustChips(-25)">-25</button>
+          <button class="chip-btn negative" onclick="adjustChips(-50)">-50</button>
+        </div>
+      </div>
+
+      <!-- Admin Panel (Eric Kara only) -->
+      <div id="admin-panel" class="admin-panel" style="display:none">
+
+        <!-- Timer Control -->
+        <div class="admin-card">
+          <div class="admin-card-title">Timer Control</div>
+          <button id="timer-toggle-btn" class="timer-btn resume" onclick="handleTimerToggle()">▶  Start</button>
+        </div>
+
+        <!-- Eliminate Player -->
+        <div class="admin-card">
+          <div class="admin-card-title">Eliminate Player</div>
+          <div id="admin-eliminate-list"></div>
+        </div>
+
+        <!-- Chip Stacks -->
+        <div class="admin-card">
+          <div class="admin-card-title">Chip Stacks</div>
+          <div id="admin-chips-list"></div>
+        </div>
+
+      </div>
+
+      <!-- Game Info -->
+      <div class="info-card">
+        <div class="info-item">
+          <div class="info-value" id="info-players">—</div>
+          <div class="info-label">Players</div>
+        </div>
+        <div class="info-item" id="info-pool-item" onclick="startEdit('pool')">
+          <div class="info-value" id="info-pool">—</div>
+          <input class="info-edit-input" id="info-pool-input" type="number"
+            onblur="commitEdit('pool')" onkeydown="if(event.key==='Enter')commitEdit('pool')" style="display:none" />
+          <div class="info-label">Prize Pool</div>
+        </div>
+        <div class="info-item" id="info-bounty-item" onclick="startEdit('bounty')">
+          <div class="info-value" id="info-bounty">—</div>
+          <input class="info-edit-input" id="info-bounty-input" type="number"
+            onblur="commitEdit('bounty')" onkeydown="if(event.key==='Enter')commitEdit('bounty')" style="display:none" />
+          <div class="info-label">Bounty</div>
+        </div>
+      </div>
+
+      <!-- Standings -->
+      <div class="section-title">Standings</div>
+      <div id="standings" class="standings"></div>
+    </div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA3NqdyL2HSR8J2Tq8b2QVILjZmRXpefZI",
+      authDomain: "poker-app-ba63f.firebaseapp.com",
+      projectId: "poker-app-ba63f",
+      storageBucket: "poker-app-ba63f.firebasestorage.app",
+      messagingSenderId: "156332634233",
+      appId: "1:156332634233:web:d579fe9daf214d9752e4a8"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    const params = new URLSearchParams(window.location.search);
+    const playerId = params.get('pid');
+    const sessionId = params.get('sid') || new Date().toISOString().split('T')[0];
+
+    const BLIND_LEVELS = [
+      { levelNumber: 1,  smallBlind: '0.25', bigBlind: '0.50', isBreak: false },
+      { levelNumber: 2,  smallBlind: '0.50', bigBlind: '1',    isBreak: false },
+      { levelNumber: 3,  smallBlind: '1',    bigBlind: '2',    isBreak: false },
+      { levelNumber: 4,  smallBlind: '2',    bigBlind: '4',    isBreak: false },
+      { levelNumber: null, smallBlind: '',   bigBlind: '',     isBreak: true  },
+      { levelNumber: 5,  smallBlind: '3',    bigBlind: '6',    isBreak: false },
+      { levelNumber: 6,  smallBlind: '4',    bigBlind: '8',    isBreak: false },
+      { levelNumber: 7,  smallBlind: '5',    bigBlind: '10',   isBreak: false },
+      { levelNumber: 8,  smallBlind: '10',   bigBlind: '20',   isBreak: false },
+      { levelNumber: 9,  smallBlind: '20',   bigBlind: '40',   isBreak: false },
+      { levelNumber: 10, smallBlind: '30',   bigBlind: '60',   isBreak: false },
+      { levelNumber: 11, smallBlind: '40',   bigBlind: '80',   isBreak: false },
+    ];
+
+    let sessionData = null;
+    let players = [];
+    let localTimeRemaining = 0;
+    let countdownInterval = null;
+    let myChips = 25;
+    let isHost = false;
+
+    function pad(n) { return String(n).padStart(2, '0'); }
+    function formatTime(s) { return `${pad(Math.floor(s/60))}:${pad(s%60)}`; }
+
+    function startLocalCountdown(remaining, isRunning) {
+      clearInterval(countdownInterval);
+      localTimeRemaining = Math.max(0, Math.round(remaining));
+      updateTimerDisplay();
+      if (!isRunning) return;
+      countdownInterval = setInterval(() => {
+        if (localTimeRemaining > 0) {
+          localTimeRemaining--;
+          updateTimerDisplay();
+        } else {
+          clearInterval(countdownInterval);
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      document.getElementById('timer-countdown').textContent = formatTime(localTimeRemaining);
+    }
+
+    function updateTimerFromSession(data) {
+      const levelIndex = data.timerLevelIndex || 0;
+      const isRunning = data.timerIsRunning || false;
+      const isBreakExpired = data.timerIsBreakExpired || false;
+      const syncedAt = data.timerSyncedAt;
+      let remaining = data.timerTimeRemaining || 0;
+
+      if (isRunning && syncedAt) {
+        const elapsed = (Date.now() - new Date(syncedAt).getTime()) / 1000;
+        remaining = Math.max(0, remaining - elapsed);
+      }
+
+      const level = BLIND_LEVELS[levelIndex];
+      const nextLevel = levelIndex + 1 < BLIND_LEVELS.length ? BLIND_LEVELS[levelIndex + 1] : null;
+
+      if (level.isBreak) {
+        document.getElementById('timer-level').textContent = 'BREAK';
+        document.getElementById('timer-blinds').textContent = '$20 Add-on Available';
+      } else {
+        document.getElementById('timer-level').textContent = `Level ${level.levelNumber}`;
+        document.getElementById('timer-blinds').textContent = `$${level.smallBlind} / $${level.bigBlind}`;
+      }
+
+      if (nextLevel) {
+        const nextText = nextLevel.isBreak ? 'BREAK' : `$${nextLevel.smallBlind} / $${nextLevel.bigBlind}`;
+        document.getElementById('timer-next').textContent = `Up Next: ${nextText}`;
+      }
+
+      const pausedEl = document.getElementById('timer-paused');
+      if (isBreakExpired) {
+        pausedEl.style.display = 'block';
+        pausedEl.textContent = '⏸ Break over — waiting to resume';
+      } else if (!isRunning) {
+        pausedEl.style.display = 'block';
+        pausedEl.textContent = '⏸ Timer paused';
+      } else {
+        pausedEl.style.display = 'none';
+      }
+
+      // Update admin timer button
+      if (isHost) {
+        const btn = document.getElementById('timer-toggle-btn');
+        if (btn) {
+          const neverStarted = !data.timerSyncedAt;
+          if (neverStarted) {
+            btn.textContent = '▶  Start';
+            btn.className = 'timer-btn resume';
+          } else if (isRunning && !isBreakExpired) {
+            btn.textContent = '⏸  Pause';
+            btn.className = 'timer-btn pause';
+          } else {
+            btn.textContent = '▶  Resume';
+            btn.className = 'timer-btn resume';
+          }
+        }
+      }
+
+      startLocalCountdown(remaining, isRunning && !isBreakExpired);
+    }
+
+    async function handleTimerToggle() {
+      if (!sessionData) return;
+      const isRunning = sessionData.timerIsRunning || false;
+      const isBreakExpired = sessionData.timerIsBreakExpired || false;
+      const neverStarted = !sessionData.timerSyncedAt;
+      const now = new Date().toISOString();
+
+      if (neverStarted) {
+        // First press — start from the beginning, signal iPad to open & start
+        await db.collection('sessions').doc(sessionId).update({
+          timerIsRunning: true,
+          timerSyncedAt: now,
+          gameActive: true,
+        });
+      } else if (isBreakExpired) {
+        // Break finished — advance to next level
+        const nextIndex = (sessionData.timerLevelIndex || 0) + 1;
+        if (nextIndex < BLIND_LEVELS.length) {
+          const levelDuration = sessionData.timerLevelDuration || 15;
+          const nextIsBreak = BLIND_LEVELS[nextIndex].isBreak;
+          const nextDuration = nextIsBreak ? 10 * 60 : levelDuration * 60;
+          await db.collection('sessions').doc(sessionId).update({
+            timerLevelIndex: nextIndex,
+            timerTimeRemaining: nextDuration,
+            timerIsBreakExpired: false,
+            timerIsRunning: true,
+            timerSyncedAt: now,
+          });
+        }
+      } else if (isRunning) {
+        // Pause
+        await db.collection('sessions').doc(sessionId).update({
+          timerIsRunning: false,
+          timerTimeRemaining: localTimeRemaining,
+          timerSyncedAt: now,
+        });
+      } else {
+        // Resume
+        await db.collection('sessions').doc(sessionId).update({
+          timerIsRunning: true,
+          timerSyncedAt: now,
+        });
+      }
+    }
+
+    async function eliminatePlayer(pid, name) {
+      if (!confirm(`Eliminate ${name}?`)) return;
+      await db.collection('sessions').doc(sessionId).collection('players').doc(pid).update({
+        isEliminated: true,
+      });
+    }
+
+    function startEdit(field) {
+      if (!isHost) return;
+      const valEl = document.getElementById(field === 'pool' ? 'info-pool' : 'info-bounty');
+      const inputEl = document.getElementById(field === 'pool' ? 'info-pool-input' : 'info-bounty-input');
+      const current = sessionData ? (field === 'pool' ? sessionData.totalPrizePool : sessionData.bountyTotal) : 0;
+      inputEl.value = current || 0;
+      valEl.style.display = 'none';
+      inputEl.style.display = 'block';
+      inputEl.focus();
+      inputEl.select();
+    }
+
+    async function commitEdit(field) {
+      const valEl = document.getElementById(field === 'pool' ? 'info-pool' : 'info-bounty');
+      const inputEl = document.getElementById(field === 'pool' ? 'info-pool-input' : 'info-bounty-input');
+      const val = parseFloat(inputEl.value);
+      inputEl.style.display = 'none';
+      valEl.style.display = 'block';
+      if (!isNaN(val)) {
+        const key = field === 'pool' ? 'totalPrizePool' : 'bountyTotal';
+        await db.collection('sessions').doc(sessionId).update({ [key]: val });
+      }
+    }
+
+    async function adminAdjustChips(pid, amount) {
+      const player = players.find(p => p.id === pid);
+      if (!player) return;
+      const newChips = Math.max(0, player.chipStack + amount);
+      await db.collection('sessions').doc(sessionId).collection('players').doc(pid).update({
+        chipStack: newChips,
+      });
+    }
+
+    function renderAdminPanel() {
+      if (!isHost) return;
+
+      // Eliminate list — only active players
+      const active = players.filter(p => !p.isEliminated);
+      const elimEl = document.getElementById('admin-eliminate-list');
+      if (active.length === 0) {
+        elimEl.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:0.9rem;">No active players</div>';
+      } else {
+        elimEl.innerHTML = active.map(p => `
+          <div class="admin-player-row">
+            <span class="admin-player-name">${p.firstName} ${p.lastName}</span>
+            <button class="elim-btn" onclick="eliminatePlayer('${p.id}', '${p.firstName} ${p.lastName}')">Eliminate</button>
+          </div>`).join('');
+      }
+
+      // Chip stacks — all players
+      const chipsEl = document.getElementById('admin-chips-list');
+      chipsEl.innerHTML = players.map(p => `
+        <div class="admin-player-row">
+          <span class="admin-player-name">${p.firstName} ${p.lastName}</span>
+          <span class="admin-player-chips">$${p.chipStack}</span>
+          <div class="admin-chip-btns">
+            <button class="admin-chip-btn pos" onclick="adminAdjustChips('${p.id}', 50)">+50</button>
+            <button class="admin-chip-btn pos" onclick="adminAdjustChips('${p.id}', 25)">+25</button>
+            <button class="admin-chip-btn neg" onclick="adminAdjustChips('${p.id}', -25)">-25</button>
+            <button class="admin-chip-btn neg" onclick="adminAdjustChips('${p.id}', -50)">-50</button>
+          </div>
+        </div>`).join('');
+    }
+
+    function renderStandings() {
+      const sorted = [...players].sort((a, b) => {
+        if (a.isEliminated !== b.isEliminated) return a.isEliminated ? 1 : -1;
+        return b.chipStack - a.chipStack;
+      });
+
+      const el = document.getElementById('standings');
+      el.innerHTML = sorted.map((p, i) => {
+        const isMe = p.id === playerId;
+        const eliminated = p.isEliminated;
+        return `
+          <div class="standing-row ${isMe ? 'me' : ''} ${eliminated ? 'eliminated' : ''}">
+            <span class="standing-rank">${eliminated ? '💀' : `#${i + 1}`}</span>
+            <span class="standing-name ${isMe ? 'me' : ''}">${p.firstName} ${p.lastName}${isMe ? ' (You)' : ''}</span>
+            <span class="standing-chips ${eliminated ? 'eliminated' : ''}">
+              ${eliminated ? 'Out' : `$${p.chipStack}`}
+            </span>
+          </div>`;
+      }).join('');
+
+      document.getElementById('info-players').textContent = players.filter(p => !p.isEliminated).length;
+    }
+
+    function renderMyCard(myPlayer) {
+      if (!myPlayer) return;
+      myChips = myPlayer.chipStack;
+      document.getElementById('my-name').textContent = `${myPlayer.firstName} ${myPlayer.lastName}`;
+      document.getElementById('my-chips').textContent = `$${myChips}`;
+      document.getElementById('my-card').style.display = 'block';
+
+      // Check if Eric Kara
+      if (myPlayer.firstName === 'Eric' && myPlayer.lastName === 'Kara') {
+        isHost = true;
+        document.getElementById('admin-panel').style.display = 'block';
+        document.getElementById('info-pool-item').style.cursor = 'pointer';
+        document.getElementById('info-bounty-item').style.cursor = 'pointer';
+      }
+    }
+
+    async function adjustChips(amount) {
+      const newChips = Math.max(0, myChips + amount);
+      myChips = newChips;
+      document.getElementById('my-chips').textContent = `$${myChips}`;
+      await db.collection('sessions').doc(sessionId).collection('players').doc(playerId).update({
+        chipStack: newChips
+      });
+    }
+
+    // Listen to session
+    db.collection('sessions').doc(sessionId).onSnapshot(snap => {
+      if (!snap.exists) return;
+      sessionData = snap.data();
+      updateTimerFromSession(sessionData);
+      document.getElementById('info-pool').textContent = `$${sessionData.totalPrizePool || 0}`;
+      document.getElementById('info-bounty').textContent = `$${sessionData.bountyTotal || 0}`;
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+    });
+
+    // Listen to players
+    db.collection('sessions').doc(sessionId).collection('players').onSnapshot(snap => {
+      players = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      renderStandings();
+      if (playerId) {
+        const me = players.find(p => p.id === playerId);
+        if (me) renderMyCard(me);
+      }
+      renderAdminPanel();
+    });
+  </script>
+</body>
+</html>
